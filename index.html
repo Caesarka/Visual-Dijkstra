@@ -1,0 +1,198 @@
+<html>
+
+<body>
+    <h1>Dijkstra Alghoritm</h1>
+    <svg id="map" width="400" height="400">
+    </svg>
+    <button onclick="makeStep()">Step</button>
+
+</body>
+
+<script>
+    var startId = 1;
+    var endId = 6;
+
+    var graph = {
+        1: {
+            name: "Stuttgart",
+            links: [2, 3],
+            x: 141,
+            y: 346,
+            labelPosition: "right",
+        },
+        2: {
+            name: "Frankfurt",
+            links: [1, 3, 4, 5],
+            x: 111,
+            y: 278,
+            labelPosition: "left",
+        },
+        3: {
+            name: "Leipzig",
+            links: [1, 2, 5],
+            x: 198,
+            y: 260,
+            labelPosition: "right",
+        },
+        4: {
+            name: "Hannover",
+            links: [2, 5, 6],
+            x: 135,
+            y: 194,
+            labelPosition: "left",
+        },
+        5: {
+            name: "Berlin",
+            links: [2, 3, 4, 6],
+            x: 217,
+            y: 177,
+            labelPosition: "right",
+        },
+        6: {
+            name: "Copenhagen",
+            links: [4, 5],
+            x: 159,
+            y: 54,
+            labelPosition: "right",
+        },
+    }
+
+
+
+    const svg = document.getElementById("map");
+
+    for (const cityId in graph) {
+
+        const city = graph[cityId];
+
+        for (const neighbourId of city.links) {
+
+            if (cityId > neighbourId) {
+                continue;
+            }
+
+            const neighbour = graph[neighbourId];
+
+            const line = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "line"
+            );
+
+            line.setAttribute("x1", city.x);
+            line.setAttribute("y1", city.y);
+            line.setAttribute("x2", neighbour.x);
+            line.setAttribute("y2", neighbour.y);
+
+            line.setAttribute("stroke", "black");
+
+            svg.appendChild(line);
+
+            const distance = getDistance(neighbourId, cityId);
+
+            const label = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "text"
+            );
+
+            label.setAttribute("x", (city.x + neighbour.x) / 2);
+            label.setAttribute("y", (city.y + neighbour.y) / 2 - 5);
+            label.setAttribute("text-anchor", "middle");
+            label.textContent = distance;
+
+            svg.appendChild(label);
+        }
+    }
+
+    for (const cityId in graph) {
+        const city = graph[cityId];
+
+        const circle = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+        );
+
+        circle.setAttribute("cx", city.x);
+        circle.setAttribute("cy", city.y);
+        circle.setAttribute("r", 10);
+        circle.setAttribute("id", cityId);
+
+
+        svg.appendChild(circle);
+
+        const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+        );
+
+        if (city.labelPosition == "left") {
+            text.setAttribute("x", city.x - 15);
+            text.setAttribute("text-anchor", "end");
+        }
+        else{
+            text.setAttribute("x", city.x + 15);
+            text.setAttribute("text-anchor", "start");
+        }
+
+        text.setAttribute("y", city.y + 5);
+
+        text.textContent = city.name;
+
+        svg.appendChild(text);
+    }
+
+    const circles = document.querySelectorAll("circle");
+    //var cityId = startId;
+
+    var unique = new Set();
+    var queued = new Set();
+    var queue = [startId];
+    let currentNode = null;
+
+    function makeStep(){
+        if (currentNode != null) {
+            currentNode.style.stroke = "gray";
+        }
+
+        const vertexId = queue.shift();
+        currentNode = document.getElementById(vertexId);
+        console.log("------------------");
+        console.log(vertexId);
+
+        currentNode.style.stroke = "green";
+        currentNode.style.strokeWidth = "3";
+        if (!unique.has(vertexId)) {
+            console.log("not visited yet")
+            unique.add(vertexId);
+
+            for (var nodeId of graph[vertexId].links) {
+                console.log(nodeId);
+                if (!unique.has(nodeId) && !queued.has(nodeId)) {
+                    queue.push(nodeId);
+                    queued.add(nodeId);
+                }
+                
+            }
+        }
+        else {
+            console.log("already has been visited")
+            
+        }
+    }
+
+    function getDistance(fromId, toId) {
+    const from = graph[fromId];
+    const to = graph[toId];
+    return Math.round(
+        Math.sqrt(
+            (to.x - from.x) ** 2 +
+            (to.y - from.y) ** 2
+            )
+        );
+    }
+
+
+
+</script>
+
+
+</html>
