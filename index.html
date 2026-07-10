@@ -172,17 +172,14 @@
         }
     };
 
-    let startId;
-    let endId;
     let currentNodeId;
     var graph = germany;
+    let startCity = null;
+    let finishCity = null;
 
 
 
     function initializeGraph() {
-        startId = 1;
-        endId = Object.keys(graph).length;
-
         history.length = 0;
         processed.clear();
 
@@ -196,8 +193,12 @@
                 parents[cityId] = null;
             }
 
-        costs[startId] = 0;
-        currentNodeId = findLowestCostNode();
+        if (startCity !== null) {
+            costs[startCity] = 0;
+            currentNodeId = startCity;
+        } else {
+            currentNodeId = null;
+        }
     }
 
 
@@ -205,8 +206,8 @@
     function changeMap() {
         const country = document.getElementById("countries").value;
         graph = country === "germany" ? germany : canada;
-        var startId = 1;
-        var endId = Object.keys(graph).length;
+        var startCity = null;
+        var endCity = null;
         initializeGraph();
         renderMap();
     }
@@ -275,6 +276,7 @@
             circle.setAttribute("cy", city.y);
             circle.setAttribute("r", 10);
             circle.setAttribute("id", cityId);
+            circle.addEventListener("click", () => onCityClick(cityId));
 
 
             svg.appendChild(circle);
@@ -352,9 +354,9 @@
         parents[cityId] = null;
     }
 
-    costs[startId] = 0;
+    //costs[startCity] = 0;
 
-    currentNodeId = findLowestCostNode();
+    //currentNodeId = findLowestCostNode();
 
     function findLowestCostNode() {
         let lowest_cost = Infinity;
@@ -369,6 +371,11 @@
     }
 
     function findShortestPathDijkstra(){
+        if (startCity === null || finishCity === null) {
+            alert("Select start and destination cities.");
+            return;
+        }
+
         history.push({
             costs: {...costs},
             parents: {...parents},
@@ -376,10 +383,12 @@
             currentNodeId: currentNodeId,
         });
 
-        if (currentNodeId == null) {
+        if (currentNodeId == finishCity) {
             console.log("Finished");
             const path = findShortestPath(parents);
             console.log("Path", path);
+            render();
+            renderFinalPath();
             return;
         }
 
@@ -421,8 +430,19 @@
                 circle.style.stroke = "orange";
                 circle.style.strokeWidth = "4"
             }
+
+
+            if (cityId == startCity) {
+                circle.style.stroke = "green";
+                circle.style.strokeWidth = "3";
+            }
+
+            else if (cityId == finishCity) {
+                circle.style.stroke = "orange";
+                circle.style.strokeWidth = "4"
+            }
         }
-}
+    }
 
     function makeStepBack() {
         if (history.length == 0) {
@@ -444,7 +464,7 @@
     }
 
     function findShortestPath() {
-        let node = endId;
+        let node = finishCity;
         const path = [];
         while (node != null) {
             path.push(node);
@@ -510,7 +530,6 @@
         }
     }
 
-
     function getDistance(fromId, toId) {
         const from = graph[fromId];
         const to = graph[toId];
@@ -522,6 +541,31 @@
             );
     }
 
+    function onCityClick(cityId) {
+
+        if (startCity === null) {
+            startCity = cityId;
+            render();
+        }
+        else if (finishCity === null) {
+            finishCity = cityId;
+
+            initializeGraph();
+            render();
+        }
+        else {
+            startCity = cityId;
+            finishCity = null;
+
+            initializeGraph();
+            render();
+        }
+
+        console.log(startCity, finishCity);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => changeMap());
+    
 
 
 </script>
