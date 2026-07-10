@@ -1,6 +1,6 @@
 An interactive web application that visualizes Dijkstra's shortest path algorithm on a map of connected cities. The project demonstrates how the algorithm finds the shortest path step by step using dynamically calculated edge weights.
 
-FeaturesЖ:
+Features:
 - Interactive SVG map
 - Step-by-step visualization of Dijkstra's algorithm
 - Automatic edge weight calculation from city coordinates
